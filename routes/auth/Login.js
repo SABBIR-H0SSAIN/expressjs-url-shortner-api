@@ -1,10 +1,8 @@
-const bcrypt= require('bcrypt');
-const User= require('../../models/User.js')
-const jwt= require('jsonwebtoken');
-const duration_parser= require('parse-duration')
 require('dotenv').config()
+const bcrypt= require('bcrypt');
+const jwt= require('jsonwebtoken');
 const parseDuration = require('parse-duration').default;
-
+const User= require('../../models/User.js')
 const max_session_duration = parseDuration(process.env.MAX_SESSION_DURATION || '1d');
 
 const LoginRoute = async (req,res) => {
@@ -12,7 +10,7 @@ const LoginRoute = async (req,res) => {
 
     if(!email || !password){
         return res.status(400).send({
-            status:400,
+            success: false,
             error_code:'missing-field',
             message: "One or multipule field is missing"
         })
@@ -22,15 +20,17 @@ const LoginRoute = async (req,res) => {
 
     if(!user){
         return res.status(404).send({
-            status:404,
+            success: false,
             error_code:'invalid-credentials',
             message: "Invalid email or password"
         })  
     }
 
-    if(! await bcrypt.compare(password,user.password)){
+    const isValidPassword = await bcrypt.compare(password,user.password);
+
+    if(!isValidPassword){
         return res.status(400).send({
-            status:0,
+            success: false,
             error_code:'wrong-password',
             message: "Password is incorrect"
         });  
@@ -47,9 +47,10 @@ const LoginRoute = async (req,res) => {
 
     res.status(200).cookie('token',token,{
         httpOnly:true,
+        secure: process.env.NODE_ENV === 'production',
         maxAge: max_session_duration,
     }).send({
-        status:200,
+        success: true,
         message:"User successfully authorized",
         user: {
             name: user.name,

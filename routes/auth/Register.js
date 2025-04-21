@@ -8,7 +8,7 @@ const RegisterRoute = async (req, res) => {
 
     if (!name || !email || !password) {
         return res.status(400).send({
-            status: 0,
+            success: false,
             error_code: 'missing-field',
             message: "One or more fields are missing",
         });
@@ -16,43 +16,51 @@ const RegisterRoute = async (req, res) => {
 
     if (!validator.validate(email)) {
         return res.status(400).send({
-            status: 0,
+            success: false,
             error_code: 'email-validation-failed',
             message: "Invalid Email Address",
         });
     }
 
     const checkPasswordStrength = passwordStrength(password);
-
     if (checkPasswordStrength.id < 3) {
         return res.status(400).send({
-            status: 0,
+            success: false,
             error_code: 'password-strength-failed',
             message: "Try with a strong password",
             validation_data: checkPasswordStrength,
         });
     }
 
-    try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const user = new UserModel({ name, email, password: hashedPassword });
+    const final_email = email.trim().toLowerCase();
 
-        await user.save();
-        res.status(200).send({
-            status: 1,
-            message: "User has successfully registered",
-        });
-    } catch (error) {
-        if(error && error.errorResponse.code == 11000 ){
-            return res.status(500).send({
-                status: 0,
+    try {
+        const userExists = await UserModel.findOne({ email: final_email });
+        if (userExists) {
+            return res.status(409).send({
+                success: false,
                 error_code: 'user-already-exists',
                 message: "User already exists",
             });
         }
 
-        res.status(500).send({
-            status: 0,
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = new UserModel({
+            name,
+            email: final_email,
+            password: hashedPassword,
+        });
+
+        await user.save();
+
+        return res.status(201).send({
+            success: true,
+            message: "User has successfully registered",
+        });
+
+    } catch (error) {
+        return res.status(500).send({
+            success: false,
             error_code: 'internal-server-error',
             message: "An error occurred while registering the user",
         });

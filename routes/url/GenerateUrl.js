@@ -33,7 +33,7 @@ const GenerateUrlRoute = async (req,res) => {
 
     if(!title || !url){
         return res.status(400).send({
-            status:400,
+            success: false,
             error_code:"missing-field",
             message: "One or multiple fields are missing"
         })
@@ -41,7 +41,7 @@ const GenerateUrlRoute = async (req,res) => {
 
     if(!await validator.isURL(url)){
         return res.status(400).send({
-            status:400,
+            success: false,
             error_code:"invalid-url",
             message: "Invalid Url Provided"
         })
@@ -54,7 +54,7 @@ const GenerateUrlRoute = async (req,res) => {
 
     if (slug && (slug.length < min || slug.length > max_length || !validator.isSlug(slug))) {
         return res.status(400).send({
-            status:400,
+            success: false,
             error_code:"invalid-slug",
             message: "Invalid slug provided. Slug should be between "+min_length+" to "+max_length+" characters. Only letters, numbers and hyphens accepted"
         })
@@ -64,7 +64,7 @@ const GenerateUrlRoute = async (req,res) => {
 
     if(!final_slug){
         return res.status(400).send({
-            status:400,
+            success: false,
             error_code:"unknown-error",
             message: "Unknown error occured"
         })
@@ -81,7 +81,7 @@ const GenerateUrlRoute = async (req,res) => {
         const slugExists = await UrlModel.findOne({ slug });
         if (slugExists) {
             return res.status(409).send({
-                status: 409,
+                success: false,
                 error_code: "slug-already-exists",
                 message: "Slug already in use. Choose another or leave empty for auto-generation."
             });
@@ -91,14 +91,14 @@ const GenerateUrlRoute = async (req,res) => {
     let saved= await data.save();
     if(!saved ){
         return res.status(400).send({
-            status:400,
-            error_code:"cant-generate-url",
+            success: false,
+            error_code:"unknown-error",
             message: "Unknown error occcured try again"
         })
     }
 
     let response = {
-        status: 200,
+        success: true,
         data: {
             title,
             url,

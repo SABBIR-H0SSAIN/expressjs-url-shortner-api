@@ -3,7 +3,7 @@ const UrlModel = require('../../models/Url.js')
 const UrlListRoute = async (req,res) => {
     if(!req.user || !req?.user?.id){
         return res.status(400).send({
-            status:400,
+            success: false,
             error_code:"user-not-authorized",
             message: "User not authorized"
         })
@@ -12,7 +12,7 @@ const UrlListRoute = async (req,res) => {
     let data = await UrlModel.find({user_id:req.user.id});
 
     return res.status(200).send({
-        status:200,
+        success: true,
         message:"Url list fetched successfully",
         size: data.length,
         data: data.map((item) => {

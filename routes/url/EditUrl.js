@@ -13,7 +13,7 @@ const EditUrlRoute = async (req,res) => {
 
     if(!id){
         return res.status(400).send({
-            status:400,
+            success: false,
             error_code:"id-not-specified",
             message: "Id not specified to update"
         })
@@ -25,7 +25,7 @@ const EditUrlRoute = async (req,res) => {
 
     if (slug && (slug.length < min_length || slug.length > max_length || !validator.isSlug(slug))) {
         return res.status(400).send({
-            status:400,
+            success: false,
             error_code:"invalid-slug",
             message: "Invalid slug provided. Slug should be between "+min_length+" to "+max_length+" characters. Only letters, numbers and hyphens accepted"
         })
@@ -35,7 +35,7 @@ const EditUrlRoute = async (req,res) => {
 
     if(!target_data){
         return res.status(404).send({
-            status:404,
+            success: false,
             error_code:"not-found",
             message: "The provided id not found"
         })
@@ -50,7 +50,7 @@ const EditUrlRoute = async (req,res) => {
         const slugExists = await UrlModel.findOne({ slug });
         if (slugExists) {
             return res.status(409).send({
-                status: 409,
+                success: false,
                 error_code: "slug-already-exists",
                 message: "Slug already in use. Choose another one"
             });
@@ -63,7 +63,7 @@ const EditUrlRoute = async (req,res) => {
         let saved= await target_data.save();
         if(!saved ){
             return res.status(400).send({
-                status:400,
+                success: false,
                 error_code:"unknown-error",
                 message: "Unknown error occcured try again"
             })
@@ -71,7 +71,7 @@ const EditUrlRoute = async (req,res) => {
     }
 
     let response = {
-        status: 200,
+        success: true,
         message: "Url updated successfully",
         data: {
             title: target_data.title,
