@@ -1,9 +1,9 @@
 const UrlModel = require('../../models/Url.js')
 const validator = require('validator');
 
-const min = process.env.MIN_SLUG_LENGTH;
+const min_length = process.env.MIN_SLUG_LENGTH;
 const max_length = process.env.MAX_SLUG_LENGTH;
-const slug_length = process.env.AUTO_GENERATED_SLUG_LENGTH;
+const auto_slug_length = process.env.AUTO_GENERATED_SLUG_LENGTH;
 const max_attempt = process.env.MAX_ATTEMPT_SLUG;
 const base_url = process.env.BASE_URL;
 
@@ -17,8 +17,8 @@ function generateRandomSlug(length) {
 }
 
 
-async function generateSlug(length = slug_length) {
-    length = Math.max(length,slug_length);
+async function generateSlug(length = auto_slug_length) {
+    length = Math.max(length,auto_slug_length);
 
     for (let i = 0; i < max_attempt; i++) {
         const slug = generateRandomSlug(length);
@@ -52,7 +52,7 @@ const GenerateUrlRoute = async (req,res) => {
         slug=String(slug);
     }
 
-    if (slug && (slug.length < min || slug.length > max_length || !validator.isSlug(slug))) {
+    if (slug && (slug.length < min_length || slug.length > max_length || !validator.isSlug(slug))) {
         return res.status(400).send({
             success: false,
             error_code:"invalid-slug",

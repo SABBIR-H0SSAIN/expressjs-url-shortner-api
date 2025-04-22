@@ -3,9 +3,8 @@ const validator = require('validator');
 
 const min_length = process.env.MIN_SLUG_LENGTH;
 const max_length = process.env.MAX_SLUG_LENGTH;
-const slug_length = process.env.AUTO_GENERATED_SLUG_LENGTH;
-const max_attempt = process.env.MAX_ATTEMPT_SLUG;
 const base_url = process.env.BASE_URL;
+
 var update_count = 0;
 
 const EditUrlRoute = async (req,res) => {
@@ -55,6 +54,7 @@ const EditUrlRoute = async (req,res) => {
                 message: "Slug already in use. Choose another one"
             });
         }
+        
         target_data.slug = slug;
         update_count++;
     }
